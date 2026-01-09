@@ -42,7 +42,7 @@ export TSKEY="tskey-api-..."
 
 ## Project Structure
 
-```
+```text
 tailsnitch/
 ├── main.go              # CLI entry point
 ├── pkg/
@@ -71,6 +71,7 @@ tailsnitch/
 ### 1. Choose an ID and Category
 
 Check IDs follow the pattern `CATEGORY-NNN`:
+
 - `ACL-*` - Access control policy
 - `AUTH-*` - Authentication and keys
 - `DEV-*` - Device security
@@ -158,6 +159,7 @@ Update the check count in `README.md` if adding a new check.
 - `Pass: false` - Check failed, issues found OR manual verification needed
 
 For informational checks that just report status:
+
 - Use `Pass: true` with descriptive text
 - Use `Pass: false` only if there's an actual concern
 
@@ -171,6 +173,7 @@ For informational checks that just report status:
 ### Details Field
 
 Use `Details` to provide:
+
 - List of affected items
 - Specific configuration values
 - Manual check instructions
@@ -243,6 +246,7 @@ go test -race ./...
 ## Reporting Issues
 
 Please include:
+
 - Tailsnitch version
 - Go version
 - Steps to reproduce

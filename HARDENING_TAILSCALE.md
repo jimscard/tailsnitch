@@ -17,15 +17,16 @@ tailsnitch
 # Check for specific issues
 tailsnitch --checks=default-allow-all-policy-active,auto-approvers-bypass-admin-approval
 ```
+
 ---
 
 ## Threat Scenarios Quick Reference
 
-| You Are | Primary Threats | Coverage At Least To |
-|---------|-----------------|---------|
-| Most B2B SaaS companies | Opportunistic criminals, commodity malware | Priority 2 |
-| Companies with valuable data, enterprise customers | Targeted cybercrime, ransomware groups | Priority 4 |
-| Sensitive industries, strict compliance | Sophisticated actors, supply chain attacks | Priority 6 |
+| You Are                                            | Primary Threats                            | Coverage At Least To |
+| -------------------------------------------------- | ------------------------------------------ | -------------------- |
+| Most B2B SaaS companies                            | Opportunistic criminals, commodity malware | Priority 2           |
+| Companies with valuable data, enterprise customers | Targeted cybercrime, ransomware groups     | Priority 4           |
+| Sensitive industries, strict compliance            | Sophisticated actors, supply chain attacks | Priority 6           |
 
 ---
 
@@ -42,6 +43,7 @@ tailsnitch --checks=default-allow-all-policy-active,auto-approvers-bypass-admin-
 > **Note on ACLs vs Grants:** Tailscale now recommends using [grants](https://tailscale.com/kb/1458/grant-examples) for all new tailnet policy file configurations. Grants provide all the capabilities of ACLs plus application-layer permissions. ACLs will continue to work indefinitely, but grants are the preferred modern approach. This checklist uses ACL syntax for compatibility, but consider migrating to grants for new deployments.
 
 **Deny-All Baseline:**
+
 ```json
 {
   "acls": []
@@ -49,6 +51,7 @@ tailsnitch --checks=default-allow-all-policy-active,auto-approvers-bypass-admin-
 ```
 
 **Minimum Viable ACL:**
+
 ```json
 {
   "groups": {
@@ -152,6 +155,7 @@ Subnet routers are high-value targets—compromise one advertising a /16 and you
 - [ ] Document who has administrative access
 
 **Audit Evidence:**
+
 - Screenshot of ACL showing explicit rules
 - ACL test assertions
 - Screenshot of device approval setting enabled
@@ -162,9 +166,7 @@ Subnet routers are high-value targets—compromise one advertising a /16 and you
 
 ## Priority 2: Visibility and Alerting
 
-
-
-*You can't secure what you can't see. Start with management plane visibility.*
+_You can't secure what you can't see. Start with management plane visibility._
 
 ### 2.1 Configure Webhooks for Management Events
 
@@ -173,15 +175,15 @@ Tailscale supports [webhooks](https://tailscale.com/kb/1213/webhooks) for manage
 - [ ] Configure webhook endpoint
 - [ ] Enable alerts for critical events:
 
-| Event | Priority | Why It Matters |
-|-------|----------|----------------|
-| `userRoleUpdated` | Critical | Someone just got admin access |
-| `nodeCreated` | High | New device joined—expected? |
-| `subnetIPForwardingNotEnabled` | High | Subnet router has IP forwarding disabled |
-| `exitNodeIPForwardingNotEnabled` | High | Exit node has IP forwarding disabled |
-| `userCreated` | High | New user—are you onboarding? |
-| `nodeDeleted` | Medium | Device removed |
-| `userApproved` | Medium | User was approved |
+| Event                            | Priority | Why It Matters                           |
+| -------------------------------- | -------- | ---------------------------------------- |
+| `userRoleUpdated`                | Critical | Someone just got admin access            |
+| `nodeCreated`                    | High     | New device joined—expected?              |
+| `subnetIPForwardingNotEnabled`   | High     | Subnet router has IP forwarding disabled |
+| `exitNodeIPForwardingNotEnabled` | High     | Exit node has IP forwarding disabled     |
+| `userCreated`                    | High     | New user—are you onboarding?             |
+| `nodeDeleted`                    | Medium   | Device removed                           |
+| `userApproved`                   | Medium   | User was approved                        |
 
 - [ ] Test webhook delivery
 - [ ] Document escalation process for alerts
@@ -202,6 +204,7 @@ Even if you don't use Panther, the rule logic is useful reference.
 - [ ] Implement detection rules for critical events
 
 **Audit Evidence:**
+
 - Webhook configuration screenshot
 - Alert routing documentation
 - SIEM integration (if applicable)
@@ -211,7 +214,7 @@ Even if you don't use Panther, the rule logic is useful reference.
 
 ## Priority 3: Segmentation and Posture
 
-*Limit blast radius. A compromised frontend developer laptop shouldn't reach backend prod infrastructure they don't need access to.*
+_Limit blast radius. A compromised frontend developer laptop shouldn't reach backend prod infrastructure they don't need access to._
 
 ### 3.1 Segment by Function
 
@@ -242,10 +245,13 @@ Even if you don't use Panther, the rule logic is useful reference.
 ```json
 {
   "tests": [
-    {"src": "group:frontend", "deny": ["tag:backend-dev:*", "tag:data-infra:*"]},
-    {"src": "group:backend", "deny": ["tag:data-infra:*"]},
-    {"src": "group:engineering", "deny": ["tag:prod:*"]},
-    {"src": "tag:prod", "deny": ["autogroup:internet:*"]}
+    {
+      "src": "group:frontend",
+      "deny": ["tag:backend-dev:*", "tag:data-infra:*"]
+    },
+    { "src": "group:backend", "deny": ["tag:data-infra:*"] },
+    { "src": "group:engineering", "deny": ["tag:prod:*"] },
+    { "src": "tag:prod", "deny": ["autogroup:internet:*"] }
   ]
 }
 ```
@@ -257,9 +263,7 @@ If you're already paying for CrowdStrike/SentinelOne/Defender, connect it:
 ```json
 {
   "postures": {
-    "posture:baseline": [
-      "node:tsVersion >= '1.50.0'"
-    ],
+    "posture:baseline": ["node:tsVersion >= '1.50.0'"],
     "posture:compliant": [
       "node:tsVersion >= '1.50.0'",
       "node:os in ['macOS', 'Windows', 'iOS']"
@@ -292,6 +296,7 @@ If you're already paying for CrowdStrike/SentinelOne/Defender, connect it:
 - [ ] Document compensating controls (security groups, NACLs) for each router
 
 **Audit Evidence:**
+
 - Network diagram showing segmentation
 - Posture definitions and EDR integration
 - Subnet router inventory with routes and compensating controls
@@ -300,7 +305,7 @@ If you're already paying for CrowdStrike/SentinelOne/Defender, connect it:
 
 ## Priority 4: Access Controls
 
-*Time-limited access, third-party management, and SSH hardening.*
+_Time-limited access, third-party management, and SSH hardening._
 
 ### 4.1 Third-Party and Contractor Access
 
@@ -351,31 +356,34 @@ Third parties don't fit cleanly into employee groups. Make their access explicit
 
 Choose the approach you'll actually maintain:
 
-**Option 1: Manual process with teeth**
+#### Option 1: Manual process with teeth
+
 - [ ] Create `group:prod-access` that's normally empty
 - [ ] Document request/approval process in ticketing system
 - [ ] Admin adds user, sets calendar reminder to remove
 - [ ] Monthly audit: anyone in the group who shouldn't be?
 
-**Option 2: IdP-driven group sync**
+#### Option 2: IdP-driven group sync
+
 - [ ] Configure IdP time-limited group membership (Okta, Azure AD, Google Workspace)
 - [ ] Sync IdP groups to Tailscale
 - [ ] Access expires when IdP removes membership
 
-**Option 3: Device posture with expiring attributes**
+#### Option 3: Device posture with expiring attributes
+
 ```json
 {
   "postures": {
-    "posture:oncall-active": [
-      "custom:oncallExpiry > now()"
-    ]
+    "posture:oncall-active": ["custom:oncallExpiry > now()"]
   }
 }
 ```
+
 - [ ] Configure on-call tool integration (PagerDuty, Opsgenie)
 - [ ] Test automatic expiration
 
-**Option 4: Purpose-built JIT tooling**
+#### Option 4: Purpose-built JIT tooling
+
 - [ ] Evaluate ConductorOne, Opal, Sym, Abbey
 - [ ] Implement with approval workflows and audit trails
 
@@ -424,14 +432,29 @@ Tailscale SSH uses Tailscale identity instead of managing SSH keys. Access is co
 ```json
 {
   "sshTests": [
-    {"src": "group:engineering", "dst": ["tag:dev"], "accept": ["ubuntu"], "deny": ["root"]},
-    {"src": "group:engineering", "dst": ["tag:prod"], "deny": ["root", "ubuntu", "autogroup:nonroot"]},
-    {"src": "group:devops", "dst": ["tag:prod"], "accept": ["deploy"], "check": ["root"]}
+    {
+      "src": "group:engineering",
+      "dst": ["tag:dev"],
+      "accept": ["ubuntu"],
+      "deny": ["root"]
+    },
+    {
+      "src": "group:engineering",
+      "dst": ["tag:prod"],
+      "deny": ["root", "ubuntu", "autogroup:nonroot"]
+    },
+    {
+      "src": "group:devops",
+      "dst": ["tag:prod"],
+      "accept": ["deploy"],
+      "check": ["root"]
+    }
   ]
 }
 ```
 
 **Audit Evidence:**
+
 - Third-party group inventory with expiration dates
 - JIT workflow documentation
 - SSH ACL configuration
@@ -441,7 +464,7 @@ Tailscale SSH uses Tailscale identity instead of managing SSH keys. Access is co
 
 ## Priority 5: GitOps and Testing
 
-*Treat ACL changes like code changes.*
+_Treat ACL changes like code changes._
 
 ### 5.1 Version Control Your ACL
 
@@ -456,20 +479,20 @@ Tailscale SSH uses Tailscale identity instead of managing SSH keys. Access is co
 name: Tailscale ACL CI
 on:
   pull_request:
-    paths: ['policy.hujson']
+    paths: ["policy.hujson"]
   push:
     branches: [main]
-    paths: ['policy.hujson']
+    paths: ["policy.hujson"]
 
 jobs:
   test-acl:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run tailsnitch
         run: tailsnitch --severity high
-      
+
       - name: Test ACL
         if: github.event_name == 'pull_request'
         uses: tailscale/gitops-acl-action@v1
@@ -477,7 +500,7 @@ jobs:
           api-key: ${{ secrets.TS_API_KEY }}
           tailnet: ${{ secrets.TS_TAILNET }}
           action: test
-      
+
       - name: Apply ACL
         if: github.event_name == 'push'
         uses: tailscale/gitops-acl-action@v1
@@ -493,31 +516,55 @@ jobs:
 {
   "tests": [
     // Anti-lockout
-    {"src": "group:devops", "accept": ["tag:bastion:22", "tag:bastion:443"]},
-    {"src": "group:prod-access", "accept": ["tag:prod:22", "tag:prod:443"]},
-    
+    { "src": "group:devops", "accept": ["tag:bastion:22", "tag:bastion:443"] },
+    { "src": "group:prod-access", "accept": ["tag:prod:22", "tag:prod:443"] },
+
     // Security boundaries
-    {"src": "group:engineering", "deny": ["tag:prod:*"]},
-    {"src": "group:engineering", "deny": ["tag:prod-db:5432", "tag:prod-db:3306"]},
-    {"src": "group:frontend", "deny": ["tag:backend-dev:*", "tag:data-infra:*"]},
-    
+    { "src": "group:engineering", "deny": ["tag:prod:*"] },
+    {
+      "src": "group:engineering",
+      "deny": ["tag:prod-db:5432", "tag:prod-db:3306"]
+    },
+    {
+      "src": "group:frontend",
+      "deny": ["tag:backend-dev:*", "tag:data-infra:*"]
+    },
+
     // Third-party boundaries
-    {"src": "group:vendor-acme-2025q2", "deny": ["tag:prod:*", "tag:staging:*"]},
-    {"src": "group:msp-cloudops", "deny": ["tag:prod-db:*"]},
-    
+    {
+      "src": "group:vendor-acme-2025q2",
+      "deny": ["tag:prod:*", "tag:staging:*"]
+    },
+    { "src": "group:msp-cloudops", "deny": ["tag:prod-db:*"] },
+
     // Internet exposure
-    {"src": "tag:prod", "deny": ["autogroup:internet:*"]},
-    {"src": "tag:prod-db", "deny": ["autogroup:internet:*"]}
+    { "src": "tag:prod", "deny": ["autogroup:internet:*"] },
+    { "src": "tag:prod-db", "deny": ["autogroup:internet:*"] }
   ],
   "sshTests": [
-    {"src": "group:engineering", "dst": ["tag:dev"], "accept": ["ubuntu"], "deny": ["root"]},
-    {"src": "group:engineering", "dst": ["tag:prod"], "deny": ["root", "ubuntu", "autogroup:nonroot"]},
-    {"src": "group:devops", "dst": ["tag:prod"], "accept": ["deploy"], "check": ["root"]}
+    {
+      "src": "group:engineering",
+      "dst": ["tag:dev"],
+      "accept": ["ubuntu"],
+      "deny": ["root"]
+    },
+    {
+      "src": "group:engineering",
+      "dst": ["tag:prod"],
+      "deny": ["root", "ubuntu", "autogroup:nonroot"]
+    },
+    {
+      "src": "group:devops",
+      "dst": ["tag:prod"],
+      "accept": ["deploy"],
+      "check": ["root"]
+    }
   ]
 }
 ```
 
 **Audit Evidence:**
+
 - Git repository with ACL history
 - CI/CD pipeline configuration
 - Screenshot of failed test blocking deployment
@@ -526,13 +573,14 @@ jobs:
 
 ## Priority 6: High-Security Controls
 
-*For sensitive industries, strict compliance requirements, or genuine nation-state concerns.*
+_For sensitive industries, strict compliance requirements, or genuine nation-state concerns._
 
 ### 6.1 Tailnet Lock
 
 Tailnet Lock removes Tailscale's coordination servers from your trust chain. New devices need cryptographic signatures from customer-controlled signing nodes.
 
 **When you need this:**
+
 - Compliance frameworks requiring customer-controlled key management
 - Defense contractors or sensitive industries
 - Enterprise customers who specifically ask about control plane trust
@@ -577,6 +625,7 @@ Replace subnet routers with app connectors where possible to expose specific app
 - [ ] Tabletop exercises for compromised endpoint scenarios
 
 **Audit Evidence:**
+
 - Signing node inventory and procedures
 - App connector migration documentation
 - Penetration test results
@@ -586,7 +635,7 @@ Replace subnet routers with app connectors where possible to expose specific app
 
 ## Operational Cadence
 
-*Be honest about what you'll maintain.*
+_Be honest about what you'll maintain._
 
 ### Regular Reviews
 
@@ -631,6 +680,7 @@ Replace subnet routers with app connectors where possible to expose specific app
 ## Audit Evidence Summary
 
 ### Access Controls (CC6.1, CC6.6)
+
 - [ ] Current ACL export with timestamp
 - [ ] ACL test assertions (deny tests, anti-lockout)
 - [ ] CI/CD pipeline showing tests run on changes
@@ -638,6 +688,7 @@ Replace subnet routers with app connectors where possible to expose specific app
 - [ ] Subnet router inventory
 
 ### Access Provisioning (CC6.2)
+
 - [ ] Device approval setting screenshot
 - [ ] Auth key inventory with purposes
 - [ ] JIT access workflow documentation
@@ -645,18 +696,21 @@ Replace subnet routers with app connectors where possible to expose specific app
 - [ ] Access request/approval logs
 
 ### Access Removal (CC6.3)
+
 - [ ] Offboarding checklist
 - [ ] Sample termination showing access revocation
 - [ ] Third-party access removal documentation
 - [ ] Auth key revocation logs
 
 ### Monitoring (CC7.1, CC7.2)
+
 - [ ] Webhook configuration
 - [ ] Alert routing and escalation
 - [ ] SIEM integration (if applicable)
 - [ ] Log retention policy
 
 ### Administrative Access
+
 - [ ] Admin account inventory with MFA status
 - [ ] Session timeout configuration
 - [ ] Role assignment documentation
@@ -665,15 +719,15 @@ Replace subnet routers with app connectors where possible to expose specific app
 
 ## Compliance Control Mapping
 
-| Control | SOC 2 | CIS v8 | ISO 27001 | NIST 800-53 |
-|---------|-------|--------|-----------|-------------|
-| Explicit ACLs | CC6.1 | 3.3 | A.8.3 | AC-3 |
-| ACL Tests | CC6.1 | 4.1 | A.8.3 | AC-3 |
-| Device Posture | CC6.1 | 6.4 | A.8.3 | AC-3 |
-| Network Segmentation | CC6.6 | 12.2 | A.8.20 | SC-7 |
-| JIT Access | CC6.1, CC6.2 | 13.5 | A.5.18 | AC-6 |
-| Webhook Alerts | CC7.1, CC7.2 | 8.5 | A.8.16 | AU-2, AU-6 |
-| Auth Key Management | CC6.2, CC6.3 | 6.3 | A.5.15 | AC-2 |
+| Control              | SOC 2        | CIS v8 | ISO 27001 | NIST 800-53 |
+| -------------------- | ------------ | ------ | --------- | ----------- |
+| Explicit ACLs        | CC6.1        | 3.3    | A.8.3     | AC-3        |
+| ACL Tests            | CC6.1        | 4.1    | A.8.3     | AC-3        |
+| Device Posture       | CC6.1        | 6.4    | A.8.3     | AC-3        |
+| Network Segmentation | CC6.6        | 12.2   | A.8.20    | SC-7        |
+| JIT Access           | CC6.1, CC6.2 | 13.5   | A.5.18    | AC-6        |
+| Webhook Alerts       | CC7.1, CC7.2 | 8.5    | A.8.16    | AU-2, AU-6  |
+| Auth Key Management  | CC6.2, CC6.3 | 6.3    | A.5.15    | AC-2        |
 
 ---
 

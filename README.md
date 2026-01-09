@@ -24,10 +24,10 @@ tailsnitch --fix
 
 Download the latest release from [GitHub Releases](https://github.com/Adversis/tailsnitch/releases).
 
-**macOS users:** Remove quarantine attribute after download:
-```bash
-sudo xattr -rd com.apple.quarantine tailsnitch
-```
+~~**macOS users:** Remove quarantine attribute after download:~~
+
+
+~~sudo xattr -rd com.apple.quarantine tailsnitch~~
 
 ### Install via Go
 
@@ -35,12 +35,13 @@ sudo xattr -rd com.apple.quarantine tailsnitch
 go install github.com/Adversis/tailsnitch@latest
 ```
 
-### Build from Source
+### Build from Source (macOS)
 
 ```bash
-git clone https://github.com/Adversis/tailsnitch.git
+git clone https://github.com/jimscard/tailsnitch.git
 cd tailsnitch
-go build -o tailsnitch .
+~~go build -o tailsnitch .~~
+make dist
 ```
 
 ## Authentication
@@ -56,9 +57,10 @@ export TS_OAUTH_CLIENT_ID="..."
 export TS_OAUTH_CLIENT_SECRET="tskey-client-..."
 ```
 
-Create an OAuth client at: https://login.tailscale.com/admin/settings/oauth
+Create an OAuth client at: <https://login.tailscale.com/admin/settings/oauth>
 
 **Required scopes for read-only audit:**
+
 - `all:read` (simplest), or individually:
 - `policy_file:read` - ACL policy
 - `devices:core:read` - Device list
@@ -66,6 +68,7 @@ Create an OAuth client at: https://login.tailscale.com/admin/settings/oauth
 - `auth_keys:read` - Auth keys (for AUTH checks)
 
 **Additional scopes for fix mode:**
+
 - `devices:core` - Delete devices, modify tags (requires tag selection)
 - `auth_keys` - Delete auth keys
 
@@ -77,7 +80,7 @@ API keys operate as the user who created them and inherit that user's permission
 export TSKEY="tskey-api-..."
 ```
 
-Create an API key at: https://login.tailscale.com/admin/settings/keys
+Create an API key at: <https://login.tailscale.com/admin/settings/keys>
 
 ## Usage Examples
 
@@ -139,13 +142,13 @@ tailsnitch --fix --no-audit-log
 
 **API-fixable items:**
 
-| Check | Action |
-|-------|--------|
-| AUTH-001, AUTH-002, AUTH-003 | Delete auth keys |
-| AUTH-004 | Replace with ephemeral keys |
-| DEV-002 | Remove tags from user devices |
-| DEV-004 | Delete stale devices |
-| DEV-005 | Authorize pending devices |
+| Check                        | Action                        |
+| ---------------------------- | ----------------------------- |
+| AUTH-001, AUTH-002, AUTH-003 | Delete auth keys              |
+| AUTH-004                     | Replace with ephemeral keys   |
+| DEV-002                      | Remove tags from user devices |
+| DEV-004                      | Delete stale devices          |
+| DEV-005                      | Authorize pending devices     |
 
 Fix mode also provides direct links to the admin console for issues that require manual intervention.
 
@@ -162,12 +165,14 @@ tailsnitch --soc2 csv > soc2-evidence.csv
 ```
 
 The SOC 2 report includes:
+
 - Per-resource test results (each device, key, ACL rule tested individually)
 - CC code mappings (CC6.1, CC6.2, CC6.3, CC6.6, CC7.1, CC7.2, etc.)
 - Pass/Fail/N/A status for each control test
 - Timestamp for audit trail
 
 **Example CSV output:**
+
 ```csv
 resource_type,resource_id,resource_name,check_id,check_title,cc_codes,status,details,tested_at
 device,node123,prod-server,DEV-001,Tagged devices with key expiry disabled,CC6.1;CC6.3,PASS,Tags: [tag:server] key expiry enabled,2025-01-05T10:30:00Z
@@ -190,6 +195,7 @@ LOG-001  # Flow logs require Enterprise plan
 ```
 
 **Ignore file locations (checked in order):**
+
 1. `.tailsnitch-ignore` in current directory
 2. `~/.tailsnitch-ignore` in home directory
 
@@ -235,24 +241,24 @@ tailsnitch --json | jq -r '
 
 ## Command Reference
 
-| Flag | Description |
-|------|-------------|
-| `--json` | Output as JSON |
-| `--severity` | Filter by minimum severity: `critical`, `high`, `medium`, `low`, `info` |
-| `--category` | Filter by category: `access`, `auth`, `network`, `ssh`, `log`, `device`, `dns` |
-| `--checks` | Run specific checks (comma-separated IDs or slugs) |
-| `--list-checks` | List all available checks and exit |
-| `--tailnet` | Specify tailnet to audit (default: from API key) |
-| `--verbose` | Show passing checks too |
-| `--fix` | Enable interactive fix mode |
-| `--auto` | Auto-select safe fixes (requires `--fix`) |
-| `--dry-run` | Preview fix actions without executing (requires `--fix`) |
-| `--no-audit-log` | Disable audit logging of fix actions |
-| `--soc2` | Export SOC 2 evidence: `json` or `csv` |
-| `--tailscale-path` | Path to tailscale CLI (for Tailnet Lock checks) |
-| `--ignore-file` | Path to ignore file |
-| `--no-ignore` | Disable ignore file processing |
-| `--version` | Show version information |
+| Flag               | Description                                                                    |
+| ------------------ | ------------------------------------------------------------------------------ |
+| `--json`           | Output as JSON                                                                 |
+| `--severity`       | Filter by minimum severity: `critical`, `high`, `medium`, `low`, `info`        |
+| `--category`       | Filter by category: `access`, `auth`, `network`, `ssh`, `log`, `device`, `dns` |
+| `--checks`         | Run specific checks (comma-separated IDs or slugs)                             |
+| `--list-checks`    | List all available checks and exit                                             |
+| `--tailnet`        | Specify tailnet to audit (default: from API key)                               |
+| `--verbose`        | Show passing checks too                                                        |
+| `--fix`            | Enable interactive fix mode                                                    |
+| `--auto`           | Auto-select safe fixes (requires `--fix`)                                      |
+| `--dry-run`        | Preview fix actions without executing (requires `--fix`)                       |
+| `--no-audit-log`   | Disable audit logging of fix actions                                           |
+| `--soc2`           | Export SOC 2 evidence: `json` or `csv`                                         |
+| `--tailscale-path` | Path to tailscale CLI (for Tailnet Lock checks)                                |
+| `--ignore-file`    | Path to ignore file                                                            |
+| `--no-ignore`      | Disable ignore file processing                                                 |
+| `--version`        | Show version information                                                       |
 
 ## Security Checks
 
@@ -260,44 +266,44 @@ Tailsnitch performs 52 security checks across 7 categories. See [docs/CHECKS.md]
 
 ### Critical Severity
 
-| ID | Check | Risk |
-|----|-------|------|
-| ACL-001 | Default 'allow all' policy | All devices have unrestricted access |
-| ACL-002 | SSH autogroup:nonroot misconfiguration | SSH as any non-root user |
-| ACL-006 | tagOwners too broad | Privilege escalation via tags |
-| ACL-007 | autogroup:danger-all usage | Access granted to external users |
+| ID      | Check                                  | Risk                                 |
+| ------- | -------------------------------------- | ------------------------------------ |
+| ACL-001 | Default 'allow all' policy             | All devices have unrestricted access |
+| ACL-002 | SSH autogroup:nonroot misconfiguration | SSH as any non-root user             |
+| ACL-006 | tagOwners too broad                    | Privilege escalation via tags        |
+| ACL-007 | autogroup:danger-all usage             | Access granted to external users     |
 
 ### High Severity
 
-| ID | Check | Risk |
-|----|-------|------|
-| AUTH-001 | Reusable auth keys | Unlimited device additions if stolen |
-| AUTH-002 | Long expiry auth keys | Extended exposure window |
-| AUTH-003 | Pre-authorized keys | Bypass device approval |
-| DEV-001 | Tagged devices without key expiry | Indefinite access |
-| DEV-002 | User devices tagged | Persist after user removal |
-| DEV-010 | Tailnet Lock disabled | No protection against stolen keys |
-| DEV-012 | Pending Tailnet Lock signatures | Unsigned nodes need review |
-| NET-001 | Funnel exposure | Public internet access |
-| NET-003 | Subnet router trust boundary | Unencrypted traffic on local network |
-| SSH-002 | Root SSH without check mode | No re-authentication required |
+| ID       | Check                             | Risk                                 |
+| -------- | --------------------------------- | ------------------------------------ |
+| AUTH-001 | Reusable auth keys                | Unlimited device additions if stolen |
+| AUTH-002 | Long expiry auth keys             | Extended exposure window             |
+| AUTH-003 | Pre-authorized keys               | Bypass device approval               |
+| DEV-001  | Tagged devices without key expiry | Indefinite access                    |
+| DEV-002  | User devices tagged               | Persist after user removal           |
+| DEV-010  | Tailnet Lock disabled             | No protection against stolen keys    |
+| DEV-012  | Pending Tailnet Lock signatures   | Unsigned nodes need review           |
+| NET-001  | Funnel exposure                   | Public internet access               |
+| NET-003  | Subnet router trust boundary      | Unencrypted traffic on local network |
+| SSH-002  | Root SSH without check mode       | No re-authentication required        |
 
 ### Medium Severity
 
-| ID | Check | Risk |
-|----|-------|------|
-| ACL-004 | autogroup:member usage | External users included |
-| ACL-005 | AutoApprovers configured | Bypass route approval |
-| AUTH-004 | Non-ephemeral CI/CD keys | Stale devices accumulate |
-| DEV-003 | Outdated clients | Potential vulnerabilities |
-| DEV-004 | Stale devices | Unused attack surface |
-| DEV-005 | Unauthorized devices | Pending approval queue |
-| DEV-007 | Sensitive machine names | CT log exposure |
-| DEV-009 | Device approval config | May not be enabled |
-| NET-004 | HTTPS CT log exposure | Machine names public |
-| NET-005 | Exit node traffic visibility | Operator sees all traffic |
-| NET-006 | Serve exposure | Local services on tailnet |
-| SSH-003 | Recorder UI exposure | Sessions visible to network |
+| ID       | Check                        | Risk                        |
+| -------- | ---------------------------- | --------------------------- |
+| ACL-004  | autogroup:member usage       | External users included     |
+| ACL-005  | AutoApprovers configured     | Bypass route approval       |
+| AUTH-004 | Non-ephemeral CI/CD keys     | Stale devices accumulate    |
+| DEV-003  | Outdated clients             | Potential vulnerabilities   |
+| DEV-004  | Stale devices                | Unused attack surface       |
+| DEV-005  | Unauthorized devices         | Pending approval queue      |
+| DEV-007  | Sensitive machine names      | CT log exposure             |
+| DEV-009  | Device approval config       | May not be enabled          |
+| NET-004  | HTTPS CT log exposure        | Machine names public        |
+| NET-005  | Exit node traffic visibility | Operator sees all traffic   |
+| NET-006  | Serve exposure               | Local services on tailnet   |
+| SSH-003  | Recorder UI exposure         | Sessions visible to network |
 
 ### Informational
 
@@ -305,7 +311,7 @@ Checks for logging configuration, DNS settings, user roles, and manual verificat
 
 ## Output Example
 
-```
+```text
 +=====================================================================+
 |                    TAILSNITCH SECURITY AUDIT                        |
 |            Tailnet: example.com                                     |
