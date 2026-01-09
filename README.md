@@ -26,7 +26,6 @@ Download the latest release from [GitHub Releases](https://github.com/Adversis/t
 
 ~~**macOS users:** Remove quarantine attribute after download:~~
 
-
 ~~sudo xattr -rd com.apple.quarantine tailsnitch~~
 
 ### Install via Go

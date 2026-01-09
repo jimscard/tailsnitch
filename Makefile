@@ -12,10 +12,20 @@ LDFLAGS := -X github.com/Adversis/tailsnitch/cmd.Version=$(VERSION) \
            -X github.com/Adversis/tailsnitch/cmd.BuildID=$(BUILD_ID) \
            -X github.com/Adversis/tailsnitch/cmd.BuildDate=$(BUILD_DATE)
 
-.PHONY: build install clean rebuild sign build-signed build-universal verify-signature notarize dist dist-dmg
+.PHONY: build install clean rebuild sign build-signed build-universal verify-signature notarize dist dist-dmg run
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o $(BINARY_NAME) .
+
+run: build
+	@if [ -f .env ]; then \
+		echo "Loading .env..."; \
+		set -a; . ./.env; set +a; \
+		./$(BINARY_NAME) $(ARGS); \
+	else \
+		echo "Warning: .env not found, running without environment variables"; \
+		./$(BINARY_NAME) $(ARGS); \
+	fi
 
 build-signed: build sign
 
